@@ -16,9 +16,8 @@ It currently supports .csv files with a very specific format.
 2. Put your data into said CSV
 3. Save the file into `data/input_reservations.csv`
 4. Run `opnsense-dhcp-import.py`
-5. Embed the XML - by hand (Sorry!) into a backup XML file (to be fixed)
-6. Import XML backup into OPNSense
-7. Cross fingers, and test!
+5. Import generated XML backup `data/output_dhcp_reservations.xml` into OPNSense (specify DHCP only!)
+6. Cross fingers, and test!
 
 ### TODO
 

@@ -6,8 +6,13 @@
 # hostname
 # description
 
+network_interface = 'lan' # The interface name as defined in OPNSense - lan, opt1, etc
+platform_name = 'opnsense' # as used in the config file - only OPNSense tested
+
 input_csv_folder = 'data'
 input_csv_file = 'input_reservations.csv'
+
+output_xml_filename = 'dhcp_reservation_output.xml'
 
 from pathlib import Path
 import csv
@@ -26,6 +31,15 @@ entry_template_xml = \
         <ntpserver/>
       </staticmap>
 """
+full_xml_template = \
+"""<$platformname>
+  <dhcpd>
+    <$network>
+$reservations
+    </$network>
+  </dhcpd>
+</$platformname>
+"""
 
 #################
 # Process the CSV
@@ -33,7 +47,9 @@ entry_template_xml = \
 # Cross-platform way to do "data/inputfile.csv"
 csv_path = Path(input_csv_folder)
 input_csv = csv_path / input_csv_file
+output_XML_file = csv_path / output_xml_filename
 
+# Make this empty string; we'll append each entry to it as we go
 static_mappings_segment = ""
 
 with open (input_csv) as csvfile:
@@ -48,5 +64,18 @@ with open (input_csv) as csvfile:
         result = src.substitute(reservation)
         static_mappings_segment+=result
 
-print(static_mappings_segment)
+# insert the relevant keys into the configuration dictionary 
+main_xml_config_dict = dict( 
+    platformname=platform_name,
+    network=network_interface,
+    reservations= static_mappings_segment
+)
 
+full_xml_output = Template(full_xml_template).substitute(main_xml_config_dict)
+
+print(full_xml_output)
+
+print("Writing to data file",output_XML_file)
+
+with open(output_XML_file, 'w') as outfile:
+    outfile.write(full_xml_output + "\n")
